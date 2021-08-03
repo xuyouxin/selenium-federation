@@ -1,7 +1,9 @@
 import { config } from "./config";
 import { Driver } from "./schemas";
-import { DriverService, LocalDriverService, RemoteDriverService } from "./services";
-import { Session } from "./sessions";
+import { DriverService } from "./service/services";
+import { Session } from "./session/sessions";
+import { LocalDriverService } from "./service/local-service";
+import { RemoteDriverService } from "./service/remote-service";
 
 let driverService: DriverService<Driver, Session>
 
