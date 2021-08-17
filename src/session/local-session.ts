@@ -47,11 +47,9 @@ export class LocalSession extends Session {
     const url = `/${this.id}${isNil(path) ? '' : ('/' + path)}`;
     try {
       await this.semaphore.wait();
-      if (path == "execute/sync") {
+      if (path == "auto-cmd") {
         const { script } = request.body;
-        if (script.startsWith("autocmd://")) {
-          return await this.localExecute(script.substring("autocmd://".length));
-        }
+        return await this.localExecute(script);
       }
 
       return await axios.request(this.sanitizeRequest({
