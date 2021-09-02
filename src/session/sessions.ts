@@ -25,12 +25,18 @@ export const sanitizeCreateSessionRequest = (caps: any, defaultCaps?: any) => {
   delete _caps?.desiredCapabilities?.browserVersion;
   delete _caps?.capabilities?.alwaysMatch?.browserVersion;
   // merge with default capabilities
-  return defaultCaps ? defaultsDeep(_caps, {
-    capabilities: {
-      alwaysMatch: defaultCaps,
-    },
-    desiredCapabilities: defaultCaps,
-  }) : _caps;
+  if (_caps.desiredCapabilities.browserName == "firefox") {
+    return defaultCaps ? defaultsDeep(_caps, {
+      desiredCapabilities: defaultCaps,
+    }) : _caps;
+  } else {
+    return defaultCaps ? defaultsDeep(_caps, {
+      capabilities: {
+        alwaysMatch: defaultCaps,
+      },
+      desiredCapabilities: defaultCaps,
+    }) : _caps;
+  }
 }
 
 export const getEnvsFromRequest = (requestBody: any) => {

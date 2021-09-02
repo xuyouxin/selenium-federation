@@ -1,4 +1,4 @@
-import { Configuration, DriverMatchCriteria, LocalDriver, RemoteDriver, SessionPathParams, } from "./schemas";
+import { Configuration, DriverMatchCriteria, LocalDriver, RemoteDriver, SessionPathParams, } from "../schemas";
 import { Session } from "../session/sessions";
 import { Request } from "koa";
 import { Watchdog } from "../watchdog";
@@ -107,7 +107,7 @@ export abstract class DriverService<D extends object, S extends Session>{
 
 export const isCriteriaMatch = (driver: LocalDriver, criteria: DriverMatchCriteria): boolean =>
   (criteria.browserName? driver.browserName === criteria.browserName: true) &&
-  (criteria.tags.every(tag => driver.tags!.includes(tag))) &&
+  (criteria.tags.every(tag => driver.tags!.includes(tag as any))) &&
   (criteria.platformName ? driver.platformName === criteria.platformName : true) &&
   (criteria.uuid ? driver.uuid === criteria.uuid : true) &&
   (criteria.browserVersion ? driver.browserVersion === criteria.browserVersion : true)

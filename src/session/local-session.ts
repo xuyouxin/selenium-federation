@@ -78,14 +78,20 @@ export class LocalSession extends Session {
     }).then(res => {
       if (res.stderr) {
         return {
-          success: false,
-          error: res.stderr.toString()
-        }
+          data: res.stderr.toString(),
+          status: 500,
+          statusText: "error",
+          headers: [],
+          config: {},
+        } as AxiosResponse;
       } else {
         return {
-          success: true,
-          result: res.stdout.trim()
-        }
+          data: res.stdout.trim(),
+          status: 200,
+          statusText: "success",
+          headers: [],
+          config: {},
+        } as AxiosResponse;
       }
     });
   }
@@ -100,7 +106,7 @@ export class LocalSession extends Session {
     await Bluebird.delay(200); // wait for process ready to serve
     const requestData = sanitizeCreateSessionRequest(request.body, this.defaultCapabilities);
     const response = await retry<AxiosResponse>(
-      () => axios.request({ method: 'POST', url: this.baseUrl, data: requestData, timeout: 5e3 }),
+      () => axios.request({ method: 'POST', url: this.baseUrl, data: requestData, timeout: 120e3 }),
       {
         max: 5,
         interval: 1e3,

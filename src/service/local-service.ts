@@ -33,7 +33,7 @@ export class LocalDriverService extends DriverService<LocalDriver, LocalSession>
 
   async getStatuses(): Promise<NodeStatus[]> {
     return [{
-      configuration: { ...this.config, localDrivers: undefined },
+      configuration: { ...this.config, localDrivers: [] },
       systemInfo: {
         os: await si.osInfo(),
         system: await si.system(),
@@ -102,7 +102,7 @@ export class LocalDriverService extends DriverService<LocalDriver, LocalSession>
     const session = new LocalSession(
       driver.browserName,
       driver.webdriverPath,
-      driver.webdriverArgs!,
+      driver.webdriverArgs! as any,
       driver.webdriverEnvs,
       driver.defaultCapabilities
     );

@@ -1,6 +1,6 @@
 {
-  "name": "selenium-federation",
-  "version": "0.6.4",
+  "name": "travis-selenium-federation",
+  "version": "0.6.14",
   "description": "A lightweight alternative to selenium-grid.",
   "main": "dist/main.js",
   "files": [
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/link89/selenium-federation.git"
+    "url": "git+https://github.com/xuyouxin/selenium-federation.git"
   },
   "keywords": [
     "selenium",
@@ -29,9 +29,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/link89/selenium-federation/issues"
+    "url": "https://github.com/xuyouxin/selenium-federation/issues"
   },
-  "homepage": "https://github.com/link89/selenium-federation#readme",
+  "homepage": "https://github.com/xuyouxin/selenium-federation#readme",
   "devDependencies": {
     "@types/bluebird": "^3.5.33",
     "@types/koa": "^2.11.6",
