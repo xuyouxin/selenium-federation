@@ -41,6 +41,7 @@ export const handleSessionRequest: RequestHandler = async (ctx, next) => {
   next();
 
   if ('DELETE' === ctx.method.toUpperCase() && !params.suffix) {
+    console.log('delete session>> ', params.sessionId);
     await driverService.deleteSession(params.sessionId);
   }
 }
