@@ -1,6 +1,6 @@
 import { LocalDriver, localDriverSchema, NodeStatus, RemoteDriver } from "../schemas";
 import { RemoteSession } from "../session/remote-session";
-import { logException, logMessage } from "../utils";
+import { logException, logMessage, Semaphore } from "../utils";
 import axios from "axios";
 import { DriverService, getMatchCriteria, isCriteriaMatch } from "./services";
 import { Request } from "koa";
@@ -9,7 +9,11 @@ import Bluebird from "bluebird";
 import { flatten, minBy, shuffle, } from "lodash";
 
 export class RemoteDriverService extends DriverService<RemoteDriver, RemoteSession> {
+
+  private semaphore: Semaphore;
+
   init() {
+    this.semaphore = new Semaphore(1);
     logMessage(`working on remote mode`);
   }
 
@@ -60,17 +64,20 @@ export class RemoteDriverService extends DriverService<RemoteDriver, RemoteSessi
     if (!candidates.length) {
       throw newHttpError(404, `No Drivers Available!`)
     }
-    const driver = this.getTheLeastBusyDriver(candidates);
-    const session = new RemoteSession(driver.url);
-    return this.startSession(session, request, driver);
+    await this.semaphore.wait();
+    const remoteDriver = this.getTheLeastBusyDriver(candidates);
+    this.semaphore.signal();
+    const session = new RemoteSession(remoteDriver.url);
+    return this.startSession(session, request, remoteDriver);
   }
 
   private getTheLeastBusyDriver(candidates: [RemoteDriver, LocalDriver][]): RemoteDriver {
-    return minBy(shuffle(candidates), ([rd, ld]) => this.getSessionsByDriver(rd)?.size || Number.MAX_VALUE)![0];
+    return minBy(candidates, ([rd, ld]) => this.getSessionsByDriver(rd)?.size || Number.MAX_VALUE)![0];
   }
 
   private async getCandidates(): Promise<[RemoteDriver, LocalDriver][]> {
     const packedCandidates: [RemoteDriver, LocalDriver][][] = await Bluebird.map(this.activeRemoteDriver, async remoteDriver => {
+      // 返回的数据格式 符合 LocalDriver[]的规格
       const response = await axios.request<LocalDriver[]>({
         method: 'GET',
         baseURL: remoteDriver.url,
@@ -79,15 +86,16 @@ export class RemoteDriverService extends DriverService<RemoteDriver, RemoteSessi
       }).catch(logException);
 
       if (!response) return [];
-      return response.data.
-      filter(localDriver => localDriverSchema.isValidSync(localDriver)).
-      map(localDriver => [remoteDriver, localDriver]);
+      return response.data
+        .filter(localDriver => localDriverSchema.isValidSync(localDriver))
+        .map(localDriver => [remoteDriver, localDriver]);
     }, { concurrency: 8 });
     return flatten(packedCandidates);
   }
 
   private get activeRemoteDriver() {
-    const now = Date.now();
-    return this.drivers.filter(driver => driver.registerAt + 1e3 * this.config.registerTimeout > now);
+    // const now = Date.now();
+    // return this.drivers.filter(driver => driver.registerAt + 1e3 * this.config.registerTimeout > now);
+    return this.drivers;
   }
 }

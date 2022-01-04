@@ -30,6 +30,7 @@ export class RemoteSession extends Session {
 
   public async forward(request: Request, path?: string) {
     const url = `/session/${this.id}${isNil(path) ? '' : ('/' + path)}`;
+    console.log(`${request.method.toUpperCase()} ${url} -q ${request.query} -b ${request.body}`);
     try {
       return await axios.request({
         baseURL: this.baseUrl,

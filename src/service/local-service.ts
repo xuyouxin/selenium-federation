@@ -118,6 +118,7 @@ export class LocalDriverService extends DriverService<LocalDriver, LocalSession>
 
   onSessionDelete() {
     if (this.isReadyToReboot) {
+      console.log("start to reboot!", "cumulativeSessionsCount>>", this.cumulativeSessionsCount, ",autoRebootThreshold>>", this.config.autoRebootThreshold);
       this.reboot();
     }
   }
