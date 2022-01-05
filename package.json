@@ -1,6 +1,6 @@
 {
   "name": "travis-selenium-federation",
-  "version": "0.6.16-beta",
+  "version": "0.6.18-beta",
   "description": "A lightweight alternative to selenium-grid.",
   "main": "dist/main.js",
   "files": [

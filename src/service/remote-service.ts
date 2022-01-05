@@ -72,7 +72,13 @@ export class RemoteDriverService extends DriverService<RemoteDriver, RemoteSessi
   }
 
   private getTheLeastBusyDriver(candidates: [RemoteDriver, LocalDriver][]): RemoteDriver {
-    return minBy(candidates, ([rd, ld]) => this.getSessionsByDriver(rd)?.size || Number.MAX_VALUE)![0];
+    console.log('candidates length>>', candidates.length);
+
+    return minBy(candidates, ([rd, ld]) => {
+      const size = this.getSessionsByDriver(rd)?.size || Number.MIN_VALUE
+      console.log('candidate info>>', rd.url, size);
+      return size;
+    })![0];
   }
 
   private async getCandidates(): Promise<[RemoteDriver, LocalDriver][]> {

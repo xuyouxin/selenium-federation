@@ -75,6 +75,7 @@ export abstract class DriverService<D extends object, S extends Session>{
   async startSession(session: S, request: Request, driver: D) {
     const response = await session.start(request);
     const watchdog = new Watchdog(() => {
+      // TODO: 如果是remote模式，还得发给远方的服务也关闭
       this.deleteSession(session.id!);
     }, this.config.browserIdleTimeout);
     this.addSession(session, driver, watchdog);
