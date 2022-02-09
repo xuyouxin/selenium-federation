@@ -1,10 +1,17 @@
-import { Configuration, DriverMatchCriteria, LocalDriver, RemoteDriver, SessionPathParams, } from "../schemas";
+import {
+  Configuration,
+  DriverMatchCriteria,
+  LocalDriver,
+  NodeStatus,
+  RemoteDriver,
+  SessionPathParams,
+  SessionStats,
+} from "../schemas";
 import { Session } from "../session/sessions";
 import { Request } from "koa";
 import { Watchdog } from "../watchdog";
 import { AxiosResponse } from "axios";
 import { newHttpError } from "../error";
-import { NodeStatus, SessionStats } from "../schemas";
 
 
 export abstract class DriverService<D extends object, S extends Session>{
@@ -74,8 +81,14 @@ export abstract class DriverService<D extends object, S extends Session>{
 
   async startSession(session: S, request: Request, driver: D) {
     const response = await session.start(request);
-    const watchdog = new Watchdog(() => {
-      // TODO: 如果是remote模式，还得发给远方的服务也关闭
+    const watchdog = new Watchdog(async () => {
+      // if it is remote mode, it need send a request to remote machine to delete the session
+      // if (this.config.registerTo) {
+      //   request.method = "DELETE";
+      //   request.body = undefined;
+      //   request.query = undefined;
+      //   await session.forward(request, "");
+      // }
       this.deleteSession(session.id!);
     }, this.config.browserIdleTimeout);
     this.addSession(session, driver, watchdog);

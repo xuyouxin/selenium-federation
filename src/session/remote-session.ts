@@ -3,6 +3,7 @@ import { Request } from "koa";
 import { isNil, } from "lodash";
 import { newHttpError } from "../error";
 import { Session } from "./sessions";
+import { retry } from "../utils";
 
 export class RemoteSession extends Session {
 
@@ -26,6 +27,21 @@ export class RemoteSession extends Session {
   }
 
   public async stop() {
+    const url = `/session/${this.id}`;
+    try {
+      await retry(async () => {
+        await axios.request({
+          baseURL: this.baseUrl,
+          url,
+          method: 'DELETE',
+          timeout: 120e3,
+        });
+      })
+    } catch (e) {
+      console.log("fail to delete session");
+      if (!e.response) throw newHttpError(500, e.message, { stack: e.stack });
+      return e.response;
+    }
   }
 
   public async forward(request: Request, path?: string) {
