@@ -30,17 +30,22 @@ export class RemoteSession extends Session {
     const url = `/session/${this.id}`;
     try {
       await retry(async () => {
-        await axios.request({
-          baseURL: this.baseUrl,
-          url,
-          method: 'DELETE',
-          timeout: 120e3,
-        });
+        try {
+          await axios.request({
+            baseURL: this.baseUrl,
+            url,
+            method: 'DELETE',
+            timeout: 120e3,
+          });
+        } catch (e) {
+          // 404 indicates the session has been deleted
+          if (e.response.statusCode !== 404) {
+            throw e;
+          }
+        }
       })
     } catch (e) {
       console.log("fail to delete session");
-      if (!e.response) throw newHttpError(500, e.message, { stack: e.stack });
-      return e.response;
     }
   }
 
