@@ -39,7 +39,7 @@ export class RemoteSession extends Session {
           });
         } catch (e) {
           // 404 indicates the session has been deleted
-          if (e.response.statusCode !== 404) {
+          if (e.response.status !== 404) {
             throw e;
           }
         }
