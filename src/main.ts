@@ -3,7 +3,14 @@ import Router from "koa-router";
 import bodyParser from 'koa-bodyparser';
 
 import { config } from "./config";
-import { handleRegisterRequest, handleCreateSessionRequest, handleQueryAvailableDriversRequest , handleSessionRequest, handleGetStatusesRequest } from "./controllers";
+import {
+  handleAutocmd,
+  handleCreateSessionRequest,
+  handleGetStatusesRequest,
+  handleQueryAvailableDriversRequest,
+  handleRegisterRequest,
+  handleSessionRequest
+} from "./controllers";
 import { handleError } from "./error";
 import * as Sentry from "@sentry/node";
 import { logMessage } from "./utils";
@@ -22,7 +29,8 @@ router
   .all([
     '/session/:sessionId',
     '/session/:sessionId/(.*)',
-  ], handleSessionRequest);
+  ], handleSessionRequest)
+  .post('/auto-cmd', handleAutocmd);
 
 const baseRouter = new Router()
 baseRouter.use('/wd/hub', router.routes(), router.allowedMethods());

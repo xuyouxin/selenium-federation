@@ -1,5 +1,7 @@
 import Bluebird from "bluebird";
 import * as Sentry from "@sentry/node";
+import { exec } from "child_process";
+import { AxiosResponse } from "axios";
 
 interface IRetryOption {
   max?: number;
@@ -68,4 +70,31 @@ export function logMessage(s: string) {
 export function logException(e: Error) {
   console.error(e);
   Sentry.captureException(e);
+}
+
+export async function localExecute(cmd: string) {
+  return new Promise<{ stdout: string, stderr: string }>(function (resolve, reject) {
+    // maxBuffer is specified to avoid ERR_CHILD_PROCESS_STDIO_MAXBUFFER
+    exec(cmd, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout: string, stderr: string) => {
+      resolve({ stdout, stderr });
+    });
+  }).then(res => {
+    if (res.stderr) {
+      return {
+        data: res.stderr.toString(),
+        status: 500,
+        statusText: "error",
+        headers: [],
+        config: {},
+      } as AxiosResponse;
+    } else {
+      return {
+        data: res.stdout.trim(),
+        status: 200,
+        statusText: "success",
+        headers: [],
+        config: {},
+      } as AxiosResponse;
+    }
+  });
 }

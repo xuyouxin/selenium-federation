@@ -2,7 +2,7 @@ import { AxiosResponse } from "axios";
 import { Context } from "koa";
 import { driverService } from "./runtime";
 import { RemoteDriver, SessionPathParams } from "./schemas";
-import { logMessage, Semaphore } from "./utils";
+import { localExecute, logMessage, Semaphore } from "./utils";
 import { DEFAULT_HOST_IP_PLACEHOLDER } from "./constants";
 import { newHttpError } from "./error";
 
@@ -44,6 +44,13 @@ export const handleSessionRequest: RequestHandler = async (ctx, next) => {
     console.log('delete session>> ', params.sessionId);
     await driverService.deleteSession(params.sessionId);
   }
+}
+
+export const handleAutocmd: RequestHandler = async (ctx, next) => {
+  const { script } = ctx.request.body;
+  const response =  await localExecute(script);
+  setResponse(ctx, response);
+  next();
 }
 
 export const handleQueryAvailableDriversRequest: RequestHandler = async (ctx, next) => {

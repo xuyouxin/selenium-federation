@@ -1,5 +1,5 @@
 import { ChildProcess, exec, execSync, spawn } from "child_process";
-import { logException, retry, Semaphore } from "../utils";
+import { localExecute, logException, retry, Semaphore } from "../utils";
 import getPort from "get-port";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Request } from "koa";
@@ -49,7 +49,7 @@ export class LocalSession extends Session {
       await this.semaphore.wait();
       if (path == "auto-cmd") {
         const { script } = request.body;
-        return await this.localExecute(script);
+        return await localExecute(script);
       }
 
       return await axios.request(this.sanitizeRequest({
@@ -67,33 +67,6 @@ export class LocalSession extends Session {
     } finally {
       this.semaphore.signal();
     }
-  }
-
-  public async localExecute(cmd: string) {
-    return new Promise<{ stdout: string, stderr: string }>(function (resolve, reject) {
-      // maxBuffer is specified to avoid ERR_CHILD_PROCESS_STDIO_MAXBUFFER
-      exec(cmd, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout: string, stderr: string) => {
-        resolve({ stdout, stderr });
-      });
-    }).then(res => {
-      if (res.stderr) {
-        return {
-          data: res.stderr.toString(),
-          status: 500,
-          statusText: "error",
-          headers: [],
-          config: {},
-        } as AxiosResponse;
-      } else {
-        return {
-          data: res.stdout.trim(),
-          status: 200,
-          statusText: "success",
-          headers: [],
-          config: {},
-        } as AxiosResponse;
-      }
-    });
   }
 
   private async _start(request: Request) {
